@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitra Refferal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.58/build/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #000020;
+        }
+        
+        #threejs-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .content-container {
+            position: relative;
+            z-index: 10;
+            padding: 2rem 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 5rem;
+        }
+        
+        #btnKembali {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 0 #1a1a1a;
+            transition: all 0.1s ease-out;
+            transform: scale(0.9); /* Add a slight scale to look more 3D */
+            z-index: 20;
+        }
+        
+        #btnKembali:hover {
+            box-shadow: 0 6px 0 #1a1a1a;
+            transform: translateY(-2px) scale(0.9);
+        }
+
+        #btnKembali:active {
+            box-shadow: 0 2px 0 #1a1a1a;
+            transform: translateY(2px) scale(0.9);
+        }
+
+        .main-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .main-title span:nth-child(1) { color: #A0A0A0; }
+        .main-title span:nth-child(2) { color: #8B4513; }
+        .main-title span:nth-child(3) { color: #696969; }
+        .main-title span:nth-child(4) { color: #708090; }
+        .main-title span:nth-child(5) { color: #4E3524; }
+        .main-title span:nth-child(6) { color: #A0A0A0; }
+        .main-title span:nth-child(7) { color: #8B4513; }
+        .main-title span:nth-child(8) { color: #696969; }
+        .main-title span:nth-child(9) { color: #708090; }
+        .main-title span:nth-child(10) { color: #4E3524; }
+        .main-title span:nth-child(11) { color: #A0A0A0; }
+        .main-title span:nth-child(12) { color: #8B4513; }
+        .main-title span:nth-child(13) { color: #696969; }
+        .main-title span:nth-child(14) { color: #708090; }
+        .main-title span:nth-child(15) { color: #4E3524; }
+
+        .sub-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .program-details {
+            text-align: left;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+
+        .program-details p {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .whatsapp-button {
+            background-color: #25d366;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-size: 1.125rem;
+            font-weight: bold;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-button:hover {
+            background-color: #128c7e;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+
+        /* Styling modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+            color: white;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: white;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 0.5rem;
+            color: white;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: #25d366;
+        }
+
+        .modal-button {
+            background-color: #25d366;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .modal-button:hover {
+            background-color: #128c7e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="threejs-canvas"></canvas>
+    
+    <!-- Tombol Kembali yang baru -->
+    <button id="btnKembali">⬅ Kembali</button>
+
+    <div class="content-container">
+        <h1 class="main-title">
+            <span>M</span><span>i</span><span>t</span><span>r</span><span>a</span> <span>R</span><span>e</span><span>f</span><span>f</span><span>e</span><span>r</span><span>a</span><span>l</span>
+        </h1>
+        <p class="sub-title">Gabung mitra Refferal 7777 sekarang dan dapatkan berbagai Bonus!</p>
+
+        <div class="program-details">
+            <h2 class="text-xl font-bold mb-3">Detail Program</h2>
+            <ul class="list-disc list-inside">
+                <li>Dapatkan $1 untuk setiap pengguna baru yang berhasil Anda undang dan sudah melakukan setoran akun.</li>
+                <li>Raih bonus tambahan sebesar $2 jika Anda berhasil mengundang lebih dari 10 pengguna.</li>
+                <li>Catat email dan simpan tangkapan layar (screenshot) percakapan lengkap dari setiap anggota yang Anda undang sebagai bukti valid.</li>
+            </ul>
+        </div>
+
+        <button id="whatsappButton" class="whatsapp-button">
+            Ajukan Menjadi Mitra
+        </button>
+    </div>
+
+    <!-- The Modal -->
+    <div id="referralModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-2xl font-bold mb-4">Ajukan Kode Referral</h3>
+            <p class="mb-2 text-sm">Masukkan nama Anda untuk membuat kode referral.</p>
+            <input type="text" id="referralNameInput" class="modal-input" placeholder="Nama Anda" aria-label="Nama Anda">
+            <button id="sendReferralButton" class="modal-button">Kirim</button>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, cubes;
+        const synth = new Tone.Synth().toDestination();
+        
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById('threejs-canvas'),
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            cubes = [];
+            const cubeCount = 50;
+            const cubeSize = 0.2;
+            const colors = [
+                0x606060, 0x8B4513, 0x708090, 0x4E3524
+            ];
+
+            for (let i = 0; i < cubeCount; i++) {
+                const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                const material = new THREE.MeshBasicMaterial({
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+                const cube = new THREE.Mesh(geometry, material);
+
+                cube.position.x = (Math.random() - 0.5) * 20;
+                cube.position.y = (Math.random() - 0.5) * 20;
+                cube.position.z = (Math.random() - 0.5) * 20;
+
+                cubes.push(cube);
+                scene.add(cube);
+            }
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            cubes.forEach(cube => {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                cube.position.x += 0.01 * Math.sin(cube.position.y);
+                cube.position.y += 0.01 * Math.cos(cube.position.x);
+
+                if (cube.position.length() > 15) {
+                    cube.position.x = (Math.random() - 0.5) * 20;
+                    cube.position.y = (Math.random() - 0.5) * 20;
+                    cube.position.z = (Math.random() - 0.5) * 20;
+                }
+            });
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            init();
+            animate();
+        };
+
+        const modal = document.getElementById("referralModal");
+        const whatsappButton = document.getElementById("whatsappButton");
+        const closeButton = document.getElementsByClassName("close-button")[0];
+        const referralNameInput = document.getElementById("referralNameInput");
+        const sendReferralButton = document.getElementById("sendReferralButton");
+
+        whatsappButton.onclick = async function() {
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+            }
+            modal.style.display = "flex";
+        }
+
+        closeButton.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        sendReferralButton.onclick = async function() {
+            const name = referralNameInput.value.trim();
+            if (name) {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                }
+                synth.triggerAttackRelease("A4", "8n");
+                
+                const phoneNumber = '62859106914815';
+                const message = encodeURIComponent(`Hallo admin, aku ingin bergabung menjadi Mitra Refferal. Aku dengan kode referral: ${name}`);
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+                
+                setTimeout(() => {
+                    window.open(whatsappUrl, '_blank');
+                    modal.style.display = "none";
+                }, 200);
+            } else {
+                referralNameInput.placeholder = "Nama tidak boleh kosong!";
+            }
+        }
+        
+        document.getElementById("btnKembali").addEventListener("click", () => {
+            // Play a sound effect
+            if (Tone.context.state !== 'running') {
+                Tone.start();
+            }
+            const now = Tone.now();
+            synth.triggerAttackRelease("C5", "16n", now);
+            synth.triggerAttackRelease("E5", "16n", now + 0.1);
+
+            // Navigate back after the sound plays
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 300);
+        });
+    </script>
+</body>
+</html>

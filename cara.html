@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Setor Akun</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            text-align: center;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 6px #00ffff;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-list li {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            text-align: left;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .info-list li:before {
+            content: '-';
+            margin-right: 0.5rem;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .game-back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background-color: rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 2px solid #00ffff;
+            border-radius: 9999px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .game-back-button:hover {
+            background-color: rgba(0, 255, 255, 0.4);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .game-back-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px #00ffff;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .info-list li {
+                font-size: 1rem;
+            }
+            .game-back-button {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol kembali yang terinspirasi dari game -->
+    <a id="back-button" href="index.html" class="game-back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+    </a>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <h1>Tutorial Setor Akun</h1>
+        <ul class="info-list">
+            <li>Pada jam 8 malam Admin akan memberi info Link Form untuk menyetorkan akun.</li>
+            <li>Buka Form-nya dan isi sesuai data akun Anda.</li>
+            <li>Yang bisa ikut setor hanya akun yang memenuhi kriteria, yaitu minimal usia akun 1 tahun (Mei 2024) dan punya koneksi 20.</li>
+            <li>Jika koneksi kalian belum 20, harap melakukan GB koneksi dulu sesama member di link yang sudah dibagikan di halaman utama.</li>
+            <li>Dilarang menyetor 2 akun dengan 1 WhatsApp.</li>
+            <li>Dilarang memalsukan jumlah Koneksi ataupun tahun Pembuatan akun.</li>
+        </ul>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Dapatkan elemen canvas
+            const canvas = document.getElementById('bg-canvas');
+            const backButton = document.getElementById('back-button');
+
+            // --- Inisialisasi Three.js ---
+            const scene = new THREE.Scene();
+            
+            // Kamera
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Buat kubus
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.5 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            // Variabel untuk animasi
+            let zoomDirection = 1; // 1 = zoom in, -1 = zoom out
+
+            // Fungsi untuk mengupdate ukuran canvas dan aspek rasio kamera saat jendela diubah ukurannya
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            window.addEventListener('resize', onWindowResize);
+
+            // Fungsi loop animasi
+            const animate = function () {
+                requestAnimationFrame(animate);
+
+                // Rotasi kubus
+                cube.rotation.x += 0.005;
+                cube.rotation.y += 0.005;
+
+                // Animasi "zoom" melayang
+                if (zoomDirection === 1) {
+                    cube.position.z += 0.002;
+                    if (cube.position.z > 6) {
+                        zoomDirection = -1;
+                    }
+                } else {
+                    cube.position.z -= 0.002;
+                    if (cube.position.z < 4) {
+                        zoomDirection = 1;
+                    }
+                }
+
+                renderer.render(scene, camera);
+            };
+
+            // Mulai animasi saat jendela dimuat
+            animate();
+
+            // --- Efek Suara Tombol ---
+            // Menggunakan howler.js untuk audio
+            const buttonSound = new Howl({
+                src: ['https://assets.mixkit.co/sfx/preview/mixkit-small-group-of-coins-1991.mp3'],
+                html5: true
+            });
+
+            // Tambahkan event listener untuk memutar suara saat tombol diklik
+            backButton.addEventListener('click', () => {
+                buttonSound.play();
+            });
+        };
+    </script>
+
+</body>
+</html>
