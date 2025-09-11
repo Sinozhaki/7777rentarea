@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linkedin By Zen - Dengan Efek Suara</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.min.js"></script>
+    <style>
+        /* Custom styles untuk tema pixel */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #1a103c;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            image-rendering: pixelated;
+        }
+        
+        .menu-container-wrapper {
+            perspective: 1000px;
+        }
+        
+        .pixel-shadow {
+            box-shadow: 5px 5px 0px #000000;
+        }
+
+        .pixel-shadow-sm {
+             box-shadow: 3px 3px 0px #000000;
+        }
+
+        .btn-pixel {
+            box-shadow: 0 5px 0 #1a103c, 0 6px 0 black;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-pixel:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1a103c, 0 2px 0 black;
+        }
+        
+        @keyframes blink-border {
+            0%, 100% { border-color: #fef08a; } /* yellow-200 */
+            50% { border-color: #a3e635; } /* lime-400 */
+        }
+        .selected {
+            animation: blink-border 1s infinite step-end;
+        }
+        .pixel-input {
+            background-color: #1a103c;
+            border: 2px solid #a3e635;
+            color: white;
+            padding: 0.75rem;
+            width: 100%;
+        }
+        .pixel-input:focus {
+            outline: none;
+            border-color: #fef08a;
+            box-shadow: 0 0 10px #fef08a;
+        }
+        .pixel-input[readonly] {
+            background-color: #291a52;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="text-slate-200">
+
+    <!-- TAMPILAN UTAMA -->
+    <div id="main-view">
+        <div class="min-h-screen flex flex-col pb-28">
+            <header class="text-center w-full max-w-2xl mx-auto pt-8 flex-shrink-0">
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">
+                    Linkedin By Zen
+                </h1>
+                <p class="text-lime-400">Platform Penyewaan Linkedin Old</p>
+                <div class="mt-6 px-4 md:px-0">
+                    <img src="baner.png" 
+                         alt="Banner Lanskap Acak" 
+                         class="w-full h-auto object-cover border-4 border-black pixel-shadow bg-gray-800"
+                         onerror="this.style.display='none'">
+                </div>
+                <div class="hidden"><span id="current-time"></span></div>
+            </header>
+
+            <main class="flex-grow w-full flex flex-col justify-center items-center">
+                <div class="relative w-full md:w-4/5 h-40 flex justify-center items-center">
+                    <div class="menu-container-wrapper w-full h-full" id="menu-container" style="transform-style: preserve-3d;"></div>
+                </div>
+            </main>
+        </div>
+        <nav class="fixed bottom-0 left-0 right-0 bg-[#291a52] border-t-4 border-black p-4 z-50">
+            <div class="flex justify-center items-center gap-6 w-full max-w-md mx-auto">
+                <button id="up-btn" class="btn-pixel w-16 h-16 bg-fuchsia-500 border-2 border-black text-white text-3xl flex items-center justify-center"><i class="fas fa-arrow-up"></i></button>
+                <button id="ok-btn" class="btn-pixel w-20 h-20 bg-lime-400 border-2 border-black text-black text-4xl flex items-center justify-center"><i class="fas fa-check"></i></button>
+                <button id="down-btn" class="btn-pixel w-16 h-16 bg-fuchsia-500 border-2 border-black text-white text-3xl flex items-center justify-center"><i class="fas fa-arrow-down"></i></button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- TAMPILAN DETAIL REWARD -->
+    <div id="reward-view" class="hidden"><div class="min-h-screen flex flex-col items-center justify-center p-4"><div class="w-full max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">Detail Reward</h2><div class="bg-[#291a52] border-4 border-black pixel-shadow text-lg"><div class="flex border-b-4 border-black font-bold text-lime-400"><div class="w-2/3 p-3 border-r-4 border-black">Kondisi Akun</div><div class="w-1/3 p-3 text-center">Reward</div></div><div class="flex border-b-2 border-black/50"><div class="w-2/3 p-3 border-r-4 border-black">Restric</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$0</div></div><div class="flex border-b-2 border-black/50"><div class="w-2/3 p-3 border-r-4 border-black">Unrestrict</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$5</div></div><div class="flex"><div class="w-2/3 p-3 border-r-4 border-black">Save</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$10</div></div></div><div class="mt-8 space-y-4 text-center md:text-left"><div><h3 class="font-bold text-lime-400 text-xl">Restric</h3><p class="text-slate-300">Jika akun anda terkena batas saat masa sewa dan tidak bisa dibuka.</p></div><div><h3 class="font-bold text-lime-400 text-xl">Unrestrict</h3><p class="text-slate-300">Ketika akun anda terkena restric lalu bisa dibuka.</p></div><div><h3 class="font-bold text-lime-400 text-xl">Save</h3><p class="text-slate-300">Akun anda aman sampai hari Gajian tanpa terkena kendala apapun.</p></div></div><div class="mt-10 text-center"><button id="back-from-reward-btn" class="btn-pixel bg-fuchsia-500 border-2 border-black text-white text-xl flex items-center justify-center px-8 py-4 mx-auto">Kembali</button></div></div></div></div>
+    
+    <!-- TAMPILAN DETAIL JADWAL -->
+    <div id="schedule-view" class="hidden"><div class="min-h-screen flex flex-col items-center justify-center p-4"><div class="w-full max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">Detail Jadwal</h2><div class="bg-[#291a52] border-4 border-black pixel-shadow text-lg p-6 space-y-6"><div><h3 class="font-bold text-lime-400 text-xl mb-2">Jadwal Kirim Akun</h3><p class="text-slate-300 text-2xl"><i class="fas fa-paper-plane mr-3"></i>Kamis - Selasa (Jam 8 malam)</p></div><div class="border-t-2 border-black/50 my-4"></div><div><h3 class="font-bold text-lime-400 text-xl mb-2">Jadwal Payment</h3><p class="text-slate-300 text-2xl"><i class="fas fa-money-bill-wave mr-3"></i>Rabu - Kamis (Sesuai Info Admin)</p></div></div><div class="mt-10 text-center"><button id="back-from-schedule-btn" class="btn-pixel bg-fuchsia-500 border-2 border-black text-white text-xl flex items-center justify-center px-8 py-4 mx-auto">Kembali</button></div></div></div></div>
+
+    <!-- TAMPILAN PROGRAM REFERRAL -->
+    <div id="referral-view" class="hidden"><div class="min-h-screen flex flex-col items-center justify-center p-4"><div class="w-full max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">Program Referral</h2><div class="bg-[#291a52] border-4 border-black pixel-shadow text-lg"><div class="flex border-b-4 border-black font-bold text-lime-400"><div class="w-2/3 p-3 border-r-4 border-black">Jumlah Invite</div><div class="w-1/3 p-3 text-center">Bonus</div></div><div class="flex border-b-2 border-black/50"><div class="w-2/3 p-3 border-r-4 border-black">1 Orang</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$1</div></div><div class="flex border-b-2 border-black/50"><div class="w-2/3 p-3 border-r-4 border-black">2 Orang</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$2</div></div><div class="flex border-b-2 border-black/50"><div class="w-2/3 p-3 border-r-4 border-black">3 Orang</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$3</div></div><div class="flex"><div class="w-2/3 p-3 border-r-4 border-black">4 Orang</div><div class="w-1/3 p-3 text-center font-bold text-yellow-300">$5</div></div></div><div class="mt-8 text-center"><p class="text-slate-300">Jadi, per kelipatan 4 orang yang Anda invite, Anda akan mendapat <span class="font-bold text-lime-400">$5</span>. (Contoh: 8 orang = $10)</p></div><div class="mt-10 text-center space-y-4"><button id="join-referral-btn" class="btn-pixel bg-lime-400 border-2 border-black text-black text-xl flex items-center justify-center px-8 py-4 mx-auto">Gabung Mitra Referral</button><button id="back-from-referral-btn" class="btn-pixel bg-fuchsia-500 border-2 border-black text-white text-xl flex items-center justify-center px-8 py-4 mx-auto">Kembali</button></div></div></div></div>
+
+    <!-- TAMPILAN FORMULIR REFERRAL -->
+    <div id="referral-form-view" class="hidden"><div class="min-h-screen flex flex-col items-center justify-center p-4"><div class="w-full max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">Pendaftaran Mitra</h2><div class="bg-[#291a52] border-4 border-black pixel-shadow p-6 space-y-4"><div class="space-y-2"><label for="ref-email" class="font-bold text-lime-400">Email Anda</label><input type="email" id="ref-email" class="pixel-input" placeholder="contoh@email.com"></div><div class="space-y-2"><label for="ref-whatsapp" class="font-bold text-lime-400">No. WhatsApp</label><input type="tel" id="ref-whatsapp" class="pixel-input" placeholder="08xxxx"></div><div class="space-y-2"><label for="ref-code" class="font-bold text-lime-400">Buat Kode Referral Anda</label><input type="text" id="ref-code" class="pixel-input" placeholder="cth: ZENKEREN"></div></div><div class="mt-10 text-center space-y-4"><button id="submit-referral-btn" class="btn-pixel bg-lime-400 border-2 border-black text-black text-xl flex items-center justify-center px-8 py-4 mx-auto">Kirim Pendaftaran via WhatsApp</button><button id="back-from-form-btn" class="btn-pixel bg-fuchsia-500 border-2 border-black text-white text-xl flex items-center justify-center px-8 py-4 mx-auto">Kembali</button></div></div></div></div>
+
+    <!-- TAMPILAN FORMULIR SETOR AKUN -->
+    <div id="deposit-view" class="hidden"><div class="min-h-screen flex flex-col items-center justify-center p-4"><div class="w-full max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 text-yellow-300" style="text-shadow: 3px 3px 0 #000;">Setor Account</h2><div class="bg-[#291a52] border-4 border-black pixel-shadow p-6 space-y-4"><div class="space-y-2"><label for="dep-email" class="font-bold text-lime-400">Email</label><input type="email" id="dep-email" class="pixel-input" placeholder="Email akun Linkedin"></div><div class="space-y-2"><label for="dep-password" class="font-bold text-lime-400">Password</label><input type="text" id="dep-password" class="pixel-input" placeholder="Password akun Linkedin"></div><div class="space-y-2"><label for="dep-koneksi" class="font-bold text-lime-400">Koneksi</label><input type="text" id="dep-koneksi" class="pixel-input" placeholder="Jumlah koneksi"></div><div class="space-y-2"><label for="dep-age" class="font-bold text-lime-400">Age Custom</label><input type="text" id="dep-age" class="pixel-input" placeholder="Contoh: 1 bulan"></div><div class="space-y-2"><label for="dep-code" class="font-bold text-lime-400">Kode</label><input type="text" id="dep-code" class="pixel-input" value="7005" readonly></div></div><div class="mt-10 text-center space-y-4"><button id="submit-deposit-btn" class="btn-pixel bg-lime-400 border-2 border-black text-black text-xl flex items-center justify-center px-8 py-4 mx-auto">Kirim Setoran via WhatsApp</button><button id="back-from-deposit-btn" class="btn-pixel bg-fuchsia-500 border-2 border-black text-white text-xl flex items-center justify-center px-8 py-4 mx-auto">Kembali</button></div></div></div></div>
+
+    <!-- Notifikasi Global -->
+    <div id="notification" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-black text-yellow-300 px-6 py-3 border-2 border-white opacity-0 transition-opacity duration-300 pointer-events-none z-40 pixel-shadow-sm"></div>
+
+    <script>
+        window.addEventListener('load', function() {
+            // Elemen Tampilan
+            const mainView = document.getElementById('main-view');
+            const rewardView = document.getElementById('reward-view');
+            const scheduleView = document.getElementById('schedule-view');
+            const referralView = document.getElementById('referral-view');
+            const referralFormView = document.getElementById('referral-form-view');
+            const depositView = document.getElementById('deposit-view');
+            const notification = document.getElementById('notification');
+            
+            // Elemen Interaktif
+            const menuContainer = document.getElementById('menu-container');
+            const upBtn = document.getElementById('up-btn');
+            const downBtn = document.getElementById('down-btn');
+            const okBtn = document.getElementById('ok-btn');
+
+            // Tombol Kembali
+            const backFromRewardBtn = document.getElementById('back-from-reward-btn');
+            const backFromScheduleBtn = document.getElementById('back-from-schedule-btn');
+            const backFromReferralBtn = document.getElementById('back-from-referral-btn');
+            const backFromFormBtn = document.getElementById('back-from-form-btn');
+            const backFromDepositBtn = document.getElementById('back-from-deposit-btn');
+            
+            // Tombol Aksi
+            const joinReferralBtn = document.getElementById('join-referral-btn');
+            const submitReferralBtn = document.getElementById('submit-referral-btn');
+            const submitDepositBtn = document.getElementById('submit-deposit-btn');
+            
+            // Input Forms
+            const refEmail = document.getElementById('ref-email');
+            const refWhatsapp = document.getElementById('ref-whatsapp');
+            const refCode = document.getElementById('ref-code');
+            const depEmail = document.getElementById('dep-email');
+            const depPassword = document.getElementById('dep-password');
+            const depKoneksi = document.getElementById('dep-koneksi');
+            const depAge = document.getElementById('dep-age');
+            
+            let gameSynth = null;
+            function playSound(type) {
+                if (typeof Tone === 'undefined') return;
+                if (!gameSynth) {
+                    gameSynth = new Tone.Synth({oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.1 }}).toDestination();
+                    gameSynth.volume.value = -12;
+                }
+                if (Tone.context.state !== 'running') { Tone.start(); }
+                const now = Tone.now();
+                if (type === 'navigate') { gameSynth.triggerAttackRelease("C6", "16n", now); } 
+                else if (type === 'select') { gameSynth.triggerAttackRelease("C5", "16n", now); gameSynth.triggerAttackRelease("E5", "16n", now + 0.07); gameSynth.triggerAttackRelease("G5", "16n", now + 0.14); }
+            }
+
+            const menuItems = [
+                { id: 'reward-btn', icon: 'fas fa-trophy', title: 'Detail Reward', desc: 'Lihat detail reward Anda' },
+                { id: 'schedule-btn', icon: 'fas fa-calendar-alt', title: 'Detail Jadwal', desc: 'Jadwal aktivitas & timeline' },
+                { id: 'account-btn', icon: 'fas fa-user-circle', title: 'Data Account', desc: 'Kelola data akun Anda' },
+                { id: 'deposit-btn', icon: 'fas fa-cloud-upload-alt', title: 'Setor Account', desc: 'Klik untuk menyetor akun' },
+                { id: 'referral-btn', icon: 'fas fa-users', title: 'Program Referral', desc: 'Ajak teman & dapatkan bonus' }
+            ];
+            let selectedIndex = 0; 
+            let activeView = 'main';
+
+            function showView(viewName) {
+                mainView.classList.add('hidden');
+                rewardView.classList.add('hidden');
+                scheduleView.classList.add('hidden');
+                referralView.classList.add('hidden');
+                referralFormView.classList.add('hidden');
+                depositView.classList.add('hidden');
+                activeView = viewName;
+
+                if (viewName === 'reward') { rewardView.classList.remove('hidden'); } 
+                else if (viewName === 'schedule') { scheduleView.classList.remove('hidden'); } 
+                else if (viewName === 'referral') { referralView.classList.remove('hidden'); } 
+                else if (viewName === 'referral-form') { referralFormView.classList.remove('hidden'); }
+                else if (viewName === 'deposit') { depositView.classList.remove('hidden'); } 
+                else { mainView.classList.remove('hidden'); }
+            }
+
+            function createMenuItems() {
+                menuContainer.innerHTML = '';
+                menuItems.forEach((item) => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item absolute w-full h-32 p-2 bg-[#291a52] border-4 border-black flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out pixel-shadow';
+                    menuItem.id = item.id;
+                    menuItem.innerHTML = `<div class="flex flex-col items-center justify-center text-center w-full h-full gap-1"><div class="icon-box w-10 h-10 flex items-center justify-center bg-black text-lime-400 text-xl border-2 border-lime-400 transition-colors duration-300"><i class="${item.icon}"></i></div><div><div class="title-text font-bold text-base text-yellow-300 transition-colors duration-300">${item.title}</div><div class="desc-text text-xs text-slate-300">${item.desc}</div></div></div>`;
+                    menuContainer.appendChild(menuItem);
+                });
+                updateMenuDisplay();
+            }
+            
+            function updateMenuDisplay() {
+                const items = document.querySelectorAll('.menu-item');
+                const totalItems = menuItems.length;
+                const prevIndex = (selectedIndex - 1 + totalItems) % totalItems;
+                const nextIndex = (selectedIndex + 1) % totalItems;
+                items.forEach((item, index) => {
+                    item.classList.remove('selected', 'opacity-100', 'opacity-30', 'pointer-events-auto');
+                    item.classList.add('opacity-0', 'pointer-events-none');
+                    item.style.zIndex = 5;
+                    if (index === selectedIndex) {
+                        item.classList.add('selected', 'opacity-100', 'pointer-events-auto');
+                        item.classList.remove('opacity-0', 'opacity-30', 'pointer-events-none');
+                        item.style.transform = 'translateY(0px) scale(1)';
+                        item.style.zIndex = 20;
+                    } else if (index === nextIndex) {
+                        item.classList.add('opacity-30'); item.classList.remove('opacity-0');
+                        item.style.transform = 'translateY(80px) scale(0.85)';
+                        item.style.zIndex = 10;
+                    } else if (index === prevIndex) {
+                        item.classList.add('opacity-30'); item.classList.remove('opacity-0');
+                        item.style.transform = 'translateY(-80px) scale(0.85)';
+                        item.style.zIndex = 10;
+                    } else { item.style.transform = 'translateY(160px) scale(0.7)'; }
+                });
+            }
+
+            function navigate(direction) {
+                playSound('navigate');
+                const totalItems = menuItems.length;
+                if (direction === 'up') { selectedIndex = (selectedIndex - 1 + totalItems) % totalItems; } 
+                else if (direction === 'down') { selectedIndex = (selectedIndex + 1) % totalItems; }
+                updateMenuDisplay();
+            }
+
+            function selectMenuItem() {
+                const selectedItem = menuItems[selectedIndex];
+                if (selectedItem.id === 'reward-btn') { playSound('select'); showView('reward'); return; }
+                if (selectedItem.id === 'schedule-btn') { playSound('select'); showView('schedule'); return; }
+                if (selectedItem.id === 'referral-btn') { playSound('select'); showView('referral'); return; }
+                if (selectedItem.id === 'deposit-btn') { playSound('select'); showView('deposit'); return; }
+                if (selectedItem.id === 'account-btn') {
+                    playSound('select');
+                    showNotification("Membuka data akun...");
+                    window.open('https://zendatarent.vercel.app/', '_blank');
+                    return;
+                }
+                playSound('select');
+                showNotification(`Membuka menu: ${selectedItem.title}`);
+            }
+
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add('opacity-100');
+                setTimeout(() => { notification.classList.remove('opacity-100'); }, 3000);
+            }
+            
+            function submitReferralForm() {
+                const email = refEmail.value.trim();
+                const whatsapp = refWhatsapp.value.trim();
+                const code = refCode.value.trim();
+                if (!email || !whatsapp || !code) { showNotification("Harap isi semua kolom!"); return; }
+                playSound('select');
+                const adminWhatsapp = "62859106914815";
+                const message = `Halo, saya ingin mendaftar sebagai Mitra Referral Linkedin By Zen.\n\nEmail: ${email}\nNo. WhatsApp: ${whatsapp}\nKode Referral: ${code}`;
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/${adminWhatsapp}?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+                showNotification("Membuka WhatsApp untuk mengirim pendaftaran...");
+            }
+
+            function submitDepositForm() {
+                const email = depEmail.value.trim();
+                const password = depPassword.value.trim();
+                const koneksi = depKoneksi.value.trim();
+                const age = depAge.value.trim();
+                const code = "7005";
+
+                if (!email || !password || !koneksi || !age) {
+                    showNotification("Harap isi semua kolom kecuali Kode!");
+                    return;
+                }
+                playSound('select');
+
+                const adminWhatsapp = "62859106914815";
+                const message = `Halo, saya ingin setor akun Linkedin.\n\n- Email: ${email}\n- Password: ${password}\n- Koneksi: ${koneksi}\n- Age Custom: ${age}\n- Kode: ${code}`;
+                const encodedMessage = encodeURIComponent(message);
+
+                const whatsappUrl = `https://wa.me/${adminWhatsapp}?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+                showNotification("Membuka WhatsApp untuk mengirim data setoran...");
+            }
+
+            // --- Event Listeners ---
+            upBtn.addEventListener('click', () => navigate('up'));
+            downBtn.addEventListener('click', () => navigate('down'));
+            okBtn.addEventListener('click', selectMenuItem);
+
+            const backToMainAction = () => { playSound('navigate'); showView('main'); };
+            backFromRewardBtn.addEventListener('click', backToMainAction);
+            backFromScheduleBtn.addEventListener('click', backToMainAction);
+            backFromReferralBtn.addEventListener('click', backToMainAction);
+            backFromDepositBtn.addEventListener('click', backToMainAction);
+            
+            joinReferralBtn.addEventListener('click', () => { playSound('navigate'); showView('referral-form'); });
+            backFromFormBtn.addEventListener('click', () => { playSound('navigate'); showView('referral'); });
+            
+            submitReferralBtn.addEventListener('click', submitReferralForm);
+            submitDepositBtn.addEventListener('click', submitDepositForm);
+
+            document.addEventListener('keydown', (e) => {
+                if (activeView !== 'main') {
+                    if (e.key === 'Escape' || e.key === 'Backspace') {
+                        if(activeView === 'referral-form') { playSound('navigate'); showView('referral'); }
+                        else { backToMainAction(); }
+                    }
+                    return;
+                }
+                if (e.key === 'ArrowUp') { e.preventDefault(); navigate('up'); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); navigate('down'); }
+                if (e.key === 'Enter') { e.preventDefault(); selectMenuItem(); }
+            });
+            
+            let touchStartY = 0;
+            menuContainer.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].screenY; }, { passive: true });
+            menuContainer.addEventListener('touchend', (e) => {
+                const touchEndY = e.changedTouches[0].screenY;
+                if (touchEndY < touchStartY - 50) navigate('down');
+                if (touchEndY > touchStartY + 50) navigate('up');
+            });
+
+            createMenuItems();
+        });
+    </script>
+</body>
+</html>
+
